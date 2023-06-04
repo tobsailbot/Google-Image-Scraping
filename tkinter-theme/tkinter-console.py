@@ -6,7 +6,7 @@ import time
 from threading import Thread
 import sv_ttk
 
-
+folder_path = ""
 
 def redirect_stdout_to_text(widget):
     class StdoutRedirector:
@@ -24,19 +24,20 @@ def redirect_stdout_to_text(widget):
 
     sys.stdout = StdoutRedirector(widget)
 
-x = 0
-def print_numbers():
-    global x  # Declarar la variable x como global
-    for i in range(1, 11):
-        x = x + 1
-        print(x)
-        time.sleep(0.5)
 
-def run_thread():
+def print_numbers(input,count,transparent, folder):
+    print(input)
+    print(count)
+    print(transparent)
+    print(folder)
+
+def run_thread(input,count,transparent,folder):
     # Crear un hilo para ejecutar el bucle de impresión de números
-    thread = Thread(target=print_numbers)
+    thread = Thread(target=print_numbers, args=(input, count, transparent, folder))
     # Iniciar el hilo
     thread.start()
+
+
 
 # Crear la ventana principal
 root = tk.Tk()
@@ -60,9 +61,9 @@ entry_1.grid(column=1, row=0,columnspan=3, pady=(5,10), padx=(0,10), sticky="w")
 label_2 = ttk.Label(main_frame, text="Images count", width=12)
 label_2.grid(column=0, row=1, pady=(15,10), padx=(10,0))
 
-entry_1 = ttk.Entry(main_frame, width=24, font=("TkDefaultFont", 10))
-entry_1.insert(0, "5")  # Insertar el valor predeterminado "5"
-entry_1.grid(column=1, row=1,columnspan=3, pady=(15,10), sticky="w")
+entry_2 = ttk.Entry(main_frame, width=24, font=("TkDefaultFont", 10))
+entry_2.insert(0, "5")  # Insertar el valor predeterminado "5"
+entry_2.grid(column=1, row=1,columnspan=3, pady=(15,10), sticky="w")
 
 # Crear un widget Checkbutton para activar/desactivar el modo transparente
 label_3 = ttk.Label(main_frame, text="Transparent", width=12)
@@ -81,12 +82,14 @@ folder_output = tk.StringVar()
 folder_output.set("../")  # Valor inicial de la variable
 
 def select_folder():
+    global folder_path
     folder_path = filedialog.askdirectory()  # Abre el diálogo de selección de carpeta
     if folder_path:
         folder = folder_path.split("/")[-1] 
         folder_output.set('../' + folder)
         print('--------------')
         print("Output folder: ", folder_path)
+
 
 # Crear un Button para seleccionar una carpeta
 browse_folder = ttk.Button(main_frame, text="Browse", command=select_folder)
@@ -99,7 +102,19 @@ label_4.grid(column=2, row=3, pady=(11,15), padx=(0,0), sticky="w")
 separator = ttk.Separator(main_frame, orient="horizontal")
 separator.grid(column=0, row=4, columnspan=3, sticky="ew", pady=10, padx=(10,0))
 
-button = ttk.Button(main_frame, text="Download Images", command=run_thread, style="Accent.TButton", padding=(10, 5))
+
+def run_thread_with_params():
+    # Obtener los valores de los widgets o variables necesarios
+    input = entry_1.get()
+    count = int(entry_2.get())
+    transparent = CheckVar.get()
+    global folder_path
+    # Llamar a la función run_thread con los parámetros
+    if input and count > 0:
+        run_thread(input, count, transparent, folder_path)
+
+
+button = ttk.Button(main_frame, text="Download Images", command=run_thread_with_params, style="Accent.TButton", padding=(10, 5))
 button.grid(column=0, row=5, columnspan=3, pady=10)
 
 

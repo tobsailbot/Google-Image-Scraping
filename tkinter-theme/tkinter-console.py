@@ -8,7 +8,6 @@ import sv_ttk
 
 
 
-
 def redirect_stdout_to_text(widget):
     class StdoutRedirector:
         def __init__(self, text_widget):
@@ -79,12 +78,13 @@ label_4.grid(column=0, row=3, pady=(11,15), padx=(10,0))
 
 # Variable para almacenar el texto actualizado
 folder_output = tk.StringVar()
-folder_output.set("./")  # Valor inicial de la variable
+folder_output.set("../")  # Valor inicial de la variable
 
 def select_folder():
     folder_path = filedialog.askdirectory()  # Abre el diálogo de selección de carpeta
     if folder_path:
-        folder_output.set(folder_path)
+        folder = folder_path.split("/")[-1] 
+        folder_output.set('../' + folder)
         print('--------------')
         print("Output folder: ", folder_path)
 

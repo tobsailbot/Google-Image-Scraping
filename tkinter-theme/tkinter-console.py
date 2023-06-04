@@ -24,17 +24,24 @@ def print_numbers():
         print(i)
         time.sleep(1)
 
+
 # Crear la ventana principal
 root = tk.Tk()
 
 button = ttk.Button(root, text="Click me!")
 button.pack()
+
 # Crear un widget Text para mostrar la salida de la consola
 text_widget = tk.Text(root)
 text_widget.pack()
 
 
-# This is where the magic happens
+
+
+
+
+
+# Set dark theme
 sv_ttk.set_theme("dark")
 
 # Redireccionar la salida estándar a la widget Text

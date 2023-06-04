@@ -11,7 +11,9 @@ def redirect_stdout_to_text(widget):
             self.text_widget = text_widget
 
         def write(self, message):
+            self.text_widget.configure(state=tk.NORMAL)
             self.text_widget.insert(tk.END, message)
+            self.text_widget.configure(state=tk.DISABLED)
             self.text_widget.see(tk.END)
 
         def flush(self):
@@ -35,12 +37,54 @@ def run_thread():
 
 # Crear la ventana principal
 root = tk.Tk()
+# Main window configuration
+root.title("Premiere Zoom Tools")
+root.resizable(False, False)
 
-button = ttk.Button(root, text="Download Images", command=run_thread, style="Accent.TButton")
-button.pack()
+main_frame = ttk.Frame(root)
+main_frame.pack(pady=(20,15))
+
+# crear label frame
+label_frame = ttk.LabelFrame(main_frame)
+label_frame.pack()
+
+# ingresar la cadena de busqueda
+label_1 = ttk.Label(label_frame, text="Search input", width=15)
+label_1.grid(column=0, row=0, pady=5)
+entry_1 = ttk.Entry(label_frame, width=30)
+entry_1.grid(column=1, row=0, pady=5, sticky="w")
+
+# cantidad de imagenes
+label_2 = ttk.Label(label_frame, text="Images ammount", width=15)
+label_2.grid(column=0, row=1, pady=20)
+entry_1 = ttk.Entry(label_frame, width=30)
+entry_1.grid(column=1, row=1, pady=5, sticky="w")
+
+# Crear un widget Checkbutton para activar/desactivar el modo transparente
+label_3 = ttk.Label(label_frame, text="Transparent", width=15)
+label_3.grid(column=0, row=2, pady=20)
+CheckVar = tk.IntVar(0)
+check_button = ttk.Checkbutton(label_frame, variable=CheckVar)
+check_button.grid(column=1, row=2, pady=5, sticky="w")
+
+label_4 = ttk.Label(label_frame, text="Output folder", width=15)
+label_4.grid(column=0, row=5, pady=20)
+entry_4 = ttk.Entry(label_frame, width=30)
+entry_4.grid(column=1, row=5, pady=5, sticky="w")
+
+# Crear un Button para seleccionar una carpeta
+browse_folder = ttk.Button(label_frame, text="Browse")
+browse_folder.grid(column=0, row=6, pady=10)
+
+
+
+
+# button = ttk.Button(label_frame, text="Download Images", command=run_thread, style="Accent.TButton", padding=(10, 5))
+# button.grid(column=0, row=1, pady=20)
+
 
 # Crear un widget Text para mostrar la salida de la consola
-text_widget = tk.Text(root)
+text_widget = tk.Text(root, width=40, height=8, font=("Consolas", 12), wrap=tk.WORD, blockcursor=True, state=tk.DISABLED)
 text_widget.pack()
 
 

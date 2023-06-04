@@ -1,7 +1,9 @@
 import tkinter as tk
+from tkinter import ttk
 import sys
 import time
 from threading import Thread
+import sv_ttk
 
 def redirect_stdout_to_text(widget):
     class StdoutRedirector:
@@ -25,9 +27,15 @@ def print_numbers():
 # Crear la ventana principal
 root = tk.Tk()
 
+button = ttk.Button(root, text="Click me!")
+button.pack()
 # Crear un widget Text para mostrar la salida de la consola
 text_widget = tk.Text(root)
 text_widget.pack()
+
+
+# This is where the magic happens
+sv_ttk.set_theme("dark")
 
 # Redireccionar la salida estándar a la widget Text
 redirect_stdout_to_text(text_widget)

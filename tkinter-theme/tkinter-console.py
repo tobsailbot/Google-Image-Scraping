@@ -19,16 +19,24 @@ def redirect_stdout_to_text(widget):
 
     sys.stdout = StdoutRedirector(widget)
 
+x = 0
 def print_numbers():
+    global x  # Declarar la variable x como global
     for i in range(1, 11):
-        print(i)
-        time.sleep(1)
+        x = x + 1
+        print(x)
+        time.sleep(0.5)
 
+def run_thread():
+    # Crear un hilo para ejecutar el bucle de impresión de números
+    thread = Thread(target=print_numbers)
+    # Iniciar el hilo
+    thread.start()
 
 # Crear la ventana principal
 root = tk.Tk()
 
-button = ttk.Button(root, text="Click me!")
+button = ttk.Button(root, text="Download Images", command=run_thread, style="Accent.TButton")
 button.pack()
 
 # Crear un widget Text para mostrar la salida de la consola
@@ -47,11 +55,7 @@ sv_ttk.set_theme("dark")
 # Redireccionar la salida estándar a la widget Text
 redirect_stdout_to_text(text_widget)
 
-# Crear un hilo para ejecutar el bucle de impresión de números
-thread = Thread(target=print_numbers)
 
-# Iniciar el hilo
-thread.start()
 
 # Iniciar el bucle principal de Tkinter
 root.mainloop()

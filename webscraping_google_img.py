@@ -8,6 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.service import Service
 import easygui as eg
 import subprocess
+import base64
 
 # Define la ruta de la carpeta donde se guardarán las imágenes
 folder_path = r'D:\TOBI-PC\Descargas\3-VIDEO PROJECTS\1.VIDEO EDITING RESOURCES\MEDIA\IMAGES'
@@ -40,13 +41,18 @@ if not box == None:
         os.makedirs(subfolder_path)
 
 
-    def download_image(url, num):
+    def download_image(url, num, isb64):
         # write image to file
-        reponse = requests.get(url)
-        print(reponse.status_code)
-        if reponse.status_code==200:
+        if not isb64:
+            reponse = requests.get(url)
+            print(reponse.status_code)
+            if reponse.status_code==200:
+                with open(os.path.join(subfolder_path, search_input+"_"+str(num)+".png"), 'wb') as file:
+                    file.write(reponse.content)
+        if isb64:
+            image_data = base64.b64decode(url.split(",")[1])
             with open(os.path.join(subfolder_path, search_input+"_"+str(num)+".png"), 'wb') as file:
-                file.write(reponse.content)
+                file.write(image_data)
 
 
     chrome_options = webdriver.ChromeOptions()    
@@ -86,8 +92,6 @@ if not box == None:
 
 
     for i in range(1, cantidad_imgs+1):
-        # if i % 25 == 0:
-        #     continue
 
         xPath = """//*[@id="islrg"]/div[1]/div[%s]"""%(i)
 
@@ -114,20 +118,22 @@ if not box == None:
 
             if imageURL != previewImageURL:
                 # print("actual URL", imageURL)
+                b64_decode = False
                 break
 
             else:
-                #making a timeout if the full res image can't be loaded
+                # making a timeout if the full res image can't be loaded
                 currentTime = time.time()
 
                 if currentTime - timeStarted > 10:
                     print("Timeout! Will download a lower resolution image and move onto the next one")
+                    b64_decode = True
                     break
 
 
         #Downloading image
         try:
-            download_image(imageURL, i)
+            download_image(imageURL, i, b64_decode)
             print("Downloaded element %s out of %s total." % (i, cantidad_imgs))
         except:
             print("Couldn't download an image %s, continuing downloading the next one"%(i))

@@ -13,9 +13,30 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.service import Service
 import subprocess
 import base64
+import json
+import pathlib
+
+curr_dir = str(pathlib.Path().resolve())
+
+# Data to be written
+dictionary = {  "output_dir": "" }
+ 
+# Serializing json
+json_object = json.dumps(dictionary, indent=4)
 
 
-folder_path = ""
+# Opening JSON file
+try:
+    with open(curr_dir + '/' + 'settings.json', 'r') as readfile:
+        settings_file = json.load(readfile)
+except:
+    with open(curr_dir + "/" + "settings.json", "w") as outfile:
+        outfile.write(json_object)
+    with open(curr_dir + '/' + 'settings.json', 'r') as readfile:
+        settings_file = json.load(readfile)
+
+
+folder_path = settings_file["output_dir"]
 
 def redirect_stdout_to_text(widget):
     class StdoutRedirector:

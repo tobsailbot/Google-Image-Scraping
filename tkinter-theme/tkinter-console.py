@@ -2,9 +2,18 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 import sys
-import time
 from threading import Thread
 import sv_ttk
+import requests
+from selenium import webdriver
+import os
+import time
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.chrome.service import Service
+import subprocess
+import base64
+
 
 folder_path = ""
 
@@ -25,15 +34,141 @@ def redirect_stdout_to_text(widget):
     sys.stdout = StdoutRedirector(widget)
 
 
-def print_numbers(input,count,transparent, folder):
-    print(input)
-    print(count)
-    print(transparent)
-    print(folder)
+def image_scraping(input_search, count, is_transp, folder):
+    if not input_search:
+        print("'Search input' is invalid.")
 
-def run_thread(input,count,transparent,folder):
+    elif count < 1 or count > 99:
+        print("'Image count' is invalid.")
+    
+    elif not folder:
+        print("'Output folder' is invalid'.")
+
+    else:
+        print('--------------')
+        print("Downloading...")
+        transparent = ''
+        if is_transp:
+            transparent = '&tbs=ic:trans'
+
+        # Crea la subcarpeta utilizando el input de búsqueda dentro de la carpeta especificada
+        subfolder_path = os.path.join(folder, input_search)
+        # Verifica si la subcarpeta existe, y si no, la crea
+        if not os.path.isdir(subfolder_path):
+            os.makedirs(subfolder_path)
+
+        # Open output dir
+        if os.path.isdir(subfolder_path):
+            if os.name == 'nt':  # Windows
+                os.startfile(subfolder_path)
+            elif os.name == 'posix':  # macOS o Linux
+                subprocess.Popen(['open', subfolder_path])
+        else:
+            print("Can't open output dir.")
+
+
+        def download_image(url, num, isb64):
+            # write image to file
+            if not isb64:
+                reponse = requests.get(url)
+                if reponse.status_code==200:
+                    with open(os.path.join(subfolder_path, input_search+"_"+str(num)+".png"), 'wb') as file:
+                        file.write(reponse.content)
+            if isb64:
+                image_data = base64.b64decode(url.split(",")[1])
+                with open(os.path.join(subfolder_path, input_search+"_"+str(num)+".png"), 'wb') as file:
+                    file.write(image_data)
+
+        chrome_options = webdriver.ChromeOptions()    
+        # Add your options as needed    
+        options = [
+        # Define window size here
+            # "--window-size=1200,1200",
+            "--ignore-certificate-errors",
+            "--allow-running-insecure-content",
+            "--headless",
+            "--disable-gpu",
+            "--disable-extensions",
+            "--no-sandbox",
+            "--disable-dev-shm-usage",
+            '--disable-infobars',
+            '--incognito',
+            '--disable-popup-blocking'
+        ]
+
+        for option in options:
+            chrome_options.add_argument(option)
+
+        chromedriver_path = os.path.abspath("chromedriver.exe")
+        service = Service(chromedriver_path)
+        driver = webdriver.Chrome(options=chrome_options, service=service)
+
+        search_URL = f"https://www.google.com/search?tbm=isch{transparent}&q={input_search}"
+        driver.get(search_URL)
+
+        #Scrolling all the way up
+        driver.execute_script("window.scrollTo(0, 0);")
+
+        for i in range(1, count+1):
+
+            xPath = """//*[@id="islrg"]/div[1]/div[%s]"""%(i)
+
+            previewImageXPath = """//*[@id="islrg"]/div[1]/div[%s]/a[1]/div[1]/img"""%(i)
+            previewImageElement = WebDriverWait(driver, 10).until(lambda x: x.find_element(By.XPATH, previewImageXPath))
+            previewImageURL = previewImageElement.get_attribute("src")
+            # print("preview URL", previewImageURL)
+
+            driver.find_element(By.XPATH, xPath).click()
+            time.sleep(1)
+
+            #It's all about the wait
+            timeStarted = time.time()
+            while True:
+
+                try:
+                    # png, jpg
+                    imageElement = WebDriverWait(driver, 3).until(lambda x: x.find_element(By.XPATH, """//*[@id="Sva75c"]/div[2]/div/div[2]/div[2]/div[2]/c-wiz/div/div/div/div[3]/div[1]/a/img[1]"""))
+                except:
+                    # GIF 
+                    imageElement = WebDriverWait(driver, 3).until(lambda x: x.find_element(By.XPATH, """//*[@id="Sva75c"]/div[2]/div/div[2]/div[2]/div[2]/c-wiz/div/div/div/div[2]/div/a/img[1]"""))
+                    
+                imageURL= imageElement.get_attribute('src')
+
+                if imageURL != previewImageURL:
+                    # print("actual URL", imageURL)
+                    b64_decode = False
+                    break
+
+                else:
+                    # making a timeout if the full res image can't be loaded
+                    currentTime = time.time()
+
+                    if currentTime - timeStarted > 10:
+                        #print("Timeout! Will download a lower resolution image...")
+                        b64_decode = True
+                        break
+
+
+            #Downloading image
+            try:
+                download_image(imageURL, i, b64_decode)
+                print("Downloaded image %s/%s." % (i, count))
+                print('OK')
+            except:
+                print("Couldn't download image %s ..."%(i))
+
+        print('--------------')
+        print("Finished downloading all images!")
+        driver.quit()
+
+
+
+
+
+
+def run_thread(input_search,count,transparent,folder):
     # Crear un hilo para ejecutar el bucle de impresión de números
-    thread = Thread(target=print_numbers, args=(input, count, transparent, folder))
+    thread = Thread(target=image_scraping, args=(input_search, count, transparent, folder))
     # Iniciar el hilo
     thread.start()
 
@@ -43,7 +178,7 @@ def run_thread(input,count,transparent,folder):
 root = tk.Tk()
 
 # Main window configuration
-root.title("Google Images Downloader")
+root.title("Google Img Downloader")
 root.resizable(False, False)
 
 main_frame = ttk.Frame(root)
@@ -69,7 +204,7 @@ entry_2.grid(column=1, row=1,columnspan=3, pady=(15,10), sticky="w")
 label_3 = ttk.Label(main_frame, text="Transparent", width=12)
 label_3.grid(column=0, row=2, pady=(11,10), padx=(10,0))
 
-CheckVar = tk.IntVar(0)
+CheckVar = tk.IntVar()
 check_button = ttk.Checkbutton(main_frame, variable=CheckVar)
 check_button.grid(column=1, row=2, pady=(11,10), sticky="w")
 
@@ -105,13 +240,15 @@ separator.grid(column=0, row=4, columnspan=3, sticky="ew", pady=10, padx=(10,0))
 
 def run_thread_with_params():
     # Obtener los valores de los widgets o variables necesarios
-    input = entry_1.get()
-    count = int(entry_2.get())
-    transparent = CheckVar.get()
+    input_search = entry_1.get()
+    if entry_2.get():
+        count = int(entry_2.get())
+    else:
+        count = 0
+    transparent = bool(CheckVar.get())
     global folder_path
     # Llamar a la función run_thread con los parámetros
-    if input and count > 0:
-        run_thread(input, count, transparent, folder_path)
+    run_thread(input_search, count, transparent, folder_path)
 
 
 button = ttk.Button(main_frame, text="Download Images", command=run_thread_with_params, style="Accent.TButton", padding=(10, 5))
@@ -125,9 +262,6 @@ text_widget.insert(tk.END, 'Download status... \n')
 text_widget.configure(state=tk.DISABLED)
 text_widget.see(tk.END)
 text_widget.grid(column=0, row=6, columnspan=3, sticky="ew", pady=(10,5), padx=(10,0))
-
-
-
 
 
 

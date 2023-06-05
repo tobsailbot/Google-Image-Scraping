@@ -19,7 +19,7 @@ import pathlib
 curr_dir = str(pathlib.Path().resolve())
 
 # Data to be written
-dictionary = {  "output_dir": "" }
+dictionary = {  "output_folder": "" }
  
 # Serializing json
 json_object = json.dumps(dictionary, indent=4)
@@ -36,7 +36,7 @@ except:
         settings_file = json.load(readfile)
 
 
-folder_path = settings_file["output_dir"]
+folder_path = settings_file["output_folder"]
 
 def redirect_stdout_to_text(widget):
     class StdoutRedirector:
@@ -235,20 +235,23 @@ label_4.grid(column=0, row=3, pady=(11,15), padx=(10,0))
 
 # Variable para almacenar el texto actualizado
 folder_output = tk.StringVar()
-folder_output.set("../")  # Valor inicial de la variable
+folder_output.set('../' + folder_path.split("/")[-1])  # Valor inicial de la variable
 
-def select_folder():
+def change_folder():
     global folder_path
     folder_path = filedialog.askdirectory()  # Abre el diálogo de selección de carpeta
     if folder_path:
-        folder = folder_path.split("/")[-1] 
-        folder_output.set('../' + folder)
+        folder_output.set('../' + folder_path.split("/")[-1] )
         print('--------------')
         print("Output folder: ", folder_path)
+        # Write path into json file
+        settings_file["output_folder"] = folder_path
+        with open(curr_dir + '/' + 'settings.json', 'w') as writefile:
+            json.dump(settings_file, writefile, indent=4)
 
 
 # Crear un Button para seleccionar una carpeta
-browse_folder = ttk.Button(main_frame, text="Browse", command=select_folder)
+browse_folder = ttk.Button(main_frame, text="Browse", command=change_folder)
 browse_folder.grid(column=1, row=3, pady=(11,15), sticky="w")
 
 label_4 = ttk.Label(main_frame, textvariable=folder_output, width=12)

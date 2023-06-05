@@ -17,6 +17,7 @@ import json
 import pathlib
 from subprocess import CREATE_NO_WINDOW # This flag will only be available in windows
 
+# Get current directory
 curr_dir = str(pathlib.Path().resolve())
 
 # Data to be written
@@ -24,7 +25,6 @@ dictionary = {  "output_folder": "" }
  
 # Serializing json
 json_object = json.dumps(dictionary, indent=4)
-
 
 # Opening JSON file
 try:
@@ -36,9 +36,10 @@ except:
     with open(curr_dir + '/' + 'settings.json', 'r') as readfile:
         settings_file = json.load(readfile)
 
-
+# get 'output_folder' value from settings.json
 folder_path = settings_file["output_folder"]
 
+# Redirect stdout to text widget
 def redirect_stdout_to_text(widget):
     class StdoutRedirector:
         def __init__(self, text_widget):
@@ -56,6 +57,7 @@ def redirect_stdout_to_text(widget):
     sys.stdout = StdoutRedirector(widget)
 
 
+
 # Crear la ventana principal
 root = tk.Tk()
 
@@ -65,7 +67,6 @@ root.resizable(False, False)
 
 main_frame = ttk.Frame(root)
 main_frame.pack(pady=(15,10))
-
 
 
 def image_scraping(input_search, count, is_transp, folder):
@@ -80,7 +81,6 @@ def image_scraping(input_search, count, is_transp, folder):
 
     else:
         print('--------------')
-        print("Downloading...")
         transparent = ''
         if is_transp:
             transparent = '&tbs=ic:trans'
@@ -89,7 +89,10 @@ def image_scraping(input_search, count, is_transp, folder):
         subfolder_path = os.path.join(folder, input_search)
         # Verifica si la subcarpeta existe, y si no, la crea
         if not os.path.isdir(subfolder_path):
-            os.makedirs(subfolder_path)
+            try:
+                os.makedirs(subfolder_path)
+            except:
+                print("'Output folder' is invalid'.")
 
         # Open output dir
         if os.path.isdir(subfolder_path):
@@ -97,9 +100,11 @@ def image_scraping(input_search, count, is_transp, folder):
                 os.startfile(subfolder_path)
             elif os.name == 'posix':  # macOS o Linux
                 subprocess.Popen(['open', subfolder_path])
+            print("Output folder opened...")
         else:
-            print("Can't open output dir.")
+            print("Can't open output folder.")
 
+        print("Downloading...")
 
         def download_image(url, num, isb64):
             # write image to file
@@ -198,7 +203,8 @@ def image_scraping(input_search, count, is_transp, folder):
         driver.quit()
 
 
-
+# High quality
+# https://www.google.com/search?q=query&tbm=isch&tbs=isz:l
 
 
 
@@ -231,12 +237,20 @@ entry_2.grid(column=1, row=1,columnspan=3, pady=(15,10), sticky="w")
 label_3 = ttk.Label(main_frame, text="Transparent", width=12)
 label_3.grid(column=0, row=2, pady=(11,10), padx=(10,0))
 
-CheckVar = tk.IntVar()
-check_button = ttk.Checkbutton(main_frame, variable=CheckVar)
-check_button.grid(column=1, row=2, pady=(11,10), sticky="w")
+TranspVar = tk.IntVar()
+check_transp = ttk.Checkbutton(main_frame, variable=TranspVar)
+check_transp.grid(column=1, row=2, pady=(11,10), sticky="w")
+
+# Crear un widget Checkbutton para activar/desactivar el modo transparente
+label_4 = ttk.Label(main_frame, text="High quality", width=12)
+label_4.grid(column=0, row=3, pady=(11,10), padx=(10,0))
+
+HDVar = tk.IntVar()
+check_hd = ttk.Checkbutton(main_frame, variable=HDVar)
+check_hd.grid(column=1, row=3, pady=(11,10), sticky="w")
 
 label_4 = ttk.Label(main_frame, text="Output folder", width=12)
-label_4.grid(column=0, row=3, pady=(11,15), padx=(10,0))
+label_4.grid(column=0, row=4, pady=(11,15), padx=(10,0))
 
 
 # Variable para almacenar el texto actualizado
@@ -258,31 +272,31 @@ def change_folder():
 
 # Crear un Button para seleccionar una carpeta
 browse_folder = ttk.Button(main_frame, text="Browse", command=change_folder)
-browse_folder.grid(column=1, row=3, pady=(11,15), sticky="w")
+browse_folder.grid(column=1, row=4, pady=(11,15), sticky="w")
 
 label_4 = ttk.Label(main_frame, textvariable=folder_output, width=12)
-label_4.grid(column=2, row=3, pady=(11,15), padx=(0,0), sticky="w")
+label_4.grid(column=2, row=4, pady=(11,15), padx=(0,0), sticky="w")
 
 
 separator = ttk.Separator(main_frame, orient="horizontal")
-separator.grid(column=0, row=4, columnspan=3, sticky="ew", pady=10, padx=(10,0))
+separator.grid(column=0, row=5, columnspan=3, sticky="ew", pady=10, padx=(10,0))
 
 
 def run_thread_with_params():
     # Obtener los valores de los widgets o variables necesarios
     input_search = entry_1.get()
-    if entry_2.get():
+    try:
         count = int(entry_2.get())
-    else:
+    except:
         count = 0
-    transparent = bool(CheckVar.get())
+    transparent = bool(TranspVar.get())
     global folder_path
     # Llamar a la función run_thread con los parámetros
     run_thread(input_search, count, transparent, folder_path)
 
 
 download_btn = ttk.Button(main_frame, text="Download Images", command=run_thread_with_params, style="Accent.TButton", padding=(10, 5))
-download_btn.grid(column=0, row=5, columnspan=3, pady=10)
+download_btn.grid(column=0, row=6, columnspan=3, pady=10)
 
 # Función para simular la pulsación del botón al presionar Enter
 def on_enter_key(event):
@@ -298,7 +312,7 @@ text_widget.configure(state=tk.NORMAL)
 text_widget.insert(tk.END, 'Download status... \n')
 text_widget.configure(state=tk.DISABLED)
 text_widget.see(tk.END)
-text_widget.grid(column=0, row=6, columnspan=3, sticky="ew", pady=(10,5), padx=(10,0))
+text_widget.grid(column=0, row=7, columnspan=3, sticky="ew", pady=(10,5), padx=(10,0))
 
 # Redireccionar la salida estándar a la widget Text
 redirect_stdout_to_text(text_widget)

@@ -69,7 +69,7 @@ main_frame = ttk.Frame(root)
 main_frame.pack(pady=(15,10))
 
 
-def image_scraping(input_search, count, is_transp, folder):
+def image_scraping(input_search, count, is_transp, is_hq, folder):
     if not input_search:
         print("'Search input' is invalid.")
 
@@ -81,9 +81,14 @@ def image_scraping(input_search, count, is_transp, folder):
 
     else:
         print('--------------')
+
         transparent = ''
         if is_transp:
             transparent = '&tbs=ic:trans'
+
+        high_quality = ''
+        if is_hq:
+            high_quality = '&tbs=isz:l'
 
         # Crea la subcarpeta utilizando el input de búsqueda dentro de la carpeta especificada
         subfolder_path = os.path.join(folder, input_search)
@@ -144,7 +149,7 @@ def image_scraping(input_search, count, is_transp, folder):
         service.creation_flags = CREATE_NO_WINDOW
         driver = webdriver.Chrome(options=chrome_options, service=service)
 
-        search_URL = f"https://www.google.com/search?tbm=isch{transparent}&q={input_search}"
+        search_URL = f"https://www.google.com/search?tbm=isch&q={input_search}{transparent}{high_quality}"
         driver.get(search_URL)
 
         #Scrolling all the way up
@@ -183,7 +188,6 @@ def image_scraping(input_search, count, is_transp, folder):
                 else:
                     # making a timeout if the full res image can't be loaded
                     currentTime = time.time()
-
                     if currentTime - timeStarted > 10:
                         #print("Timeout! Will download a lower resolution image...")
                         b64_decode = True
@@ -209,9 +213,9 @@ def image_scraping(input_search, count, is_transp, folder):
 
 
 
-def run_thread(input_search,count,transparent,folder):
+def run_thread(input_search,count,transparent, is_hq, folder):
     # Crear un hilo para ejecutar el bucle de impresión de números
-    thread = Thread(target=image_scraping, args=(input_search, count, transparent, folder))
+    thread = Thread(target=image_scraping, args=(input_search, count, transparent, is_hq, folder))
     # Iniciar el hilo
     thread.start()
 
@@ -245,8 +249,8 @@ check_transp.grid(column=1, row=2, pady=(11,10), sticky="w")
 label_4 = ttk.Label(main_frame, text="High quality", width=12)
 label_4.grid(column=0, row=3, pady=(11,10), padx=(10,0))
 
-HDVar = tk.IntVar()
-check_hd = ttk.Checkbutton(main_frame, variable=HDVar)
+HQVar = tk.IntVar()
+check_hd = ttk.Checkbutton(main_frame, variable=HQVar)
 check_hd.grid(column=1, row=3, pady=(11,10), sticky="w")
 
 label_4 = ttk.Label(main_frame, text="Output folder", width=12)
@@ -290,9 +294,10 @@ def run_thread_with_params():
     except:
         count = 0
     transparent = bool(TranspVar.get())
+    high_quality = bool(HQVar.get())
     global folder_path
     # Llamar a la función run_thread con los parámetros
-    run_thread(input_search, count, transparent, folder_path)
+    run_thread(input_search, count, transparent, high_quality, folder_path)
 
 
 download_btn = ttk.Button(main_frame, text="Download Images", command=run_thread_with_params, style="Accent.TButton", padding=(10, 5))

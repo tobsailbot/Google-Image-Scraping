@@ -15,6 +15,7 @@ import subprocess
 import base64
 import json
 import pathlib
+from subprocess import CREATE_NO_WINDOW # This flag will only be available in windows
 
 curr_dir = str(pathlib.Path().resolve())
 
@@ -53,6 +54,18 @@ def redirect_stdout_to_text(widget):
             pass
 
     sys.stdout = StdoutRedirector(widget)
+
+
+# Crear la ventana principal
+root = tk.Tk()
+
+# Main window configuration
+root.title("Google Img Downloader")
+root.resizable(False, False)
+
+main_frame = ttk.Frame(root)
+main_frame.pack(pady=(15,10))
+
 
 
 def image_scraping(input_search, count, is_transp, folder):
@@ -122,6 +135,8 @@ def image_scraping(input_search, count, is_transp, folder):
 
         chromedriver_path = os.path.abspath("chromedriver.exe")
         service = Service(chromedriver_path)
+        # hide selenium driver console window
+        service.creation_flags = CREATE_NO_WINDOW
         driver = webdriver.Chrome(options=chrome_options, service=service)
 
         search_URL = f"https://www.google.com/search?tbm=isch{transparent}&q={input_search}"
@@ -187,23 +202,13 @@ def image_scraping(input_search, count, is_transp, folder):
 
 
 
+
 def run_thread(input_search,count,transparent,folder):
     # Crear un hilo para ejecutar el bucle de impresión de números
     thread = Thread(target=image_scraping, args=(input_search, count, transparent, folder))
     # Iniciar el hilo
     thread.start()
 
-
-
-# Crear la ventana principal
-root = tk.Tk()
-
-# Main window configuration
-root.title("Google Img Downloader")
-root.resizable(False, False)
-
-main_frame = ttk.Frame(root)
-main_frame.pack(pady=(15,10))
 
 
 # ingresar la cadena de busqueda
@@ -287,7 +292,6 @@ def on_enter_key(event):
 root.bind_all("<Return>", on_enter_key)
 
 
-
 # Crear un widget Text para mostrar la salida de la consola
 text_widget = tk.Text(main_frame, width=40, height=7, font=("Consolas", 10), wrap=tk.WORD, blockcursor=True, state=tk.DISABLED, highlightcolor="gray25", fg="gray75")
 text_widget.configure(state=tk.NORMAL)
@@ -296,15 +300,11 @@ text_widget.configure(state=tk.DISABLED)
 text_widget.see(tk.END)
 text_widget.grid(column=0, row=6, columnspan=3, sticky="ew", pady=(10,5), padx=(10,0))
 
-
-
-
-# Set dark theme
-sv_ttk.set_theme("dark")
-
 # Redireccionar la salida estándar a la widget Text
 redirect_stdout_to_text(text_widget)
 
+# Set dark theme
+sv_ttk.set_theme("dark")
 
 
 # Iniciar el bucle principal de Tkinter

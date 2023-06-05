@@ -20,23 +20,29 @@ def redirect_stdout_to_text(widget):
 def print_numbers():
     for i in range(1, 11):
         print(i)
-        time.sleep(1)
+        time.sleep(.5)
 
 # Crear la ventana principal
 root = tk.Tk()
+
+
+def run_thread():
+    # Crear un hilo para ejecutar el bucle de impresión de números
+    thread = Thread(target=print_numbers)
+    # Iniciar el hilo
+    thread.start()
+
+btn = tk.Button(root, text="Run", command=run_thread)
+btn.pack()
 
 # Crear un widget Text para mostrar la salida de la consola
 text_widget = tk.Text(root)
 text_widget.pack()
 
+
 # Redireccionar la salida estándar a la widget Text
 redirect_stdout_to_text(text_widget)
 
-# Crear un hilo para ejecutar el bucle de impresión de números
-thread = Thread(target=print_numbers)
-
-# Iniciar el hilo
-thread.start()
 
 # Iniciar el bucle principal de Tkinter
 root.mainloop()

@@ -212,9 +212,10 @@ label_1.grid(column=0, row=0, pady=(5,10), padx=(10,0))
 
 entry_1 = ttk.Entry(main_frame, width=24, font=("TkDefaultFont", 10))
 entry_1.grid(column=1, row=0,columnspan=3, pady=(5,10), padx=(0,10), sticky="w")
+entry_1.focus_set()
 
 # cantidad de imagenes
-label_2 = ttk.Label(main_frame, text="Images count", width=12)
+label_2 = ttk.Label(main_frame, text="Image count", width=12)
 label_2.grid(column=0, row=1, pady=(15,10), padx=(10,0))
 
 entry_2 = ttk.Entry(main_frame, width=24, font=("TkDefaultFont", 10))
@@ -275,8 +276,16 @@ def run_thread_with_params():
     run_thread(input_search, count, transparent, folder_path)
 
 
-button = ttk.Button(main_frame, text="Download Images", command=run_thread_with_params, style="Accent.TButton", padding=(10, 5))
-button.grid(column=0, row=5, columnspan=3, pady=10)
+download_btn = ttk.Button(main_frame, text="Download Images", command=run_thread_with_params, style="Accent.TButton", padding=(10, 5))
+download_btn.grid(column=0, row=5, columnspan=3, pady=10)
+
+# Función para simular la pulsación del botón al presionar Enter
+def on_enter_key(event):
+    download_btn.invoke()
+
+# Vincular el evento Enter/Return al botón
+root.bind_all("<Return>", on_enter_key)
+
 
 
 # Crear un widget Text para mostrar la salida de la consola

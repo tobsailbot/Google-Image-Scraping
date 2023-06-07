@@ -1,3 +1,4 @@
+import math
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
@@ -63,7 +64,14 @@ def redirect_stdout_to_text(widget):
 # Crear la ventana principal
 root = tk.Tk()
 
-# Main window configuration
+ancho_pantalla = root.winfo_screenwidth()
+alto_pantalla = root.winfo_screenheight()
+
+posicion_x = (ancho_pantalla - 300) // 2
+posicion_y = (alto_pantalla - 850) // 2
+
+# # Main window configuration
+root.wm_geometry(f"+{posicion_x}+{posicion_y}")  # Posición X + Posición Y
 root.title("Google Img Downloader")
 root.resizable(False, False)
 

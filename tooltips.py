@@ -9,6 +9,7 @@ myTip = Hovertip(myBtn,'This is \na multiline tooltip.')
 
 label = tk.Label(app, text="Esto es un texto")
 label.pack()
+label.config(fg='white')
 labelTip = Hovertip(label,'Que onda negro xd')
 
 app.mainloop()

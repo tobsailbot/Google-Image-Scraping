@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
+from tktooltip import ToolTip
+from idlelib.tooltip import Hovertip
 import sys
 from threading import Thread
 import sv_ttk
@@ -253,8 +255,8 @@ HQVar = tk.IntVar()
 check_hd = ttk.Checkbutton(main_frame, variable=HQVar)
 check_hd.grid(column=1, row=3, pady=(11,10), sticky="w")
 
-label_4 = ttk.Label(main_frame, text="Output folder", width=12)
-label_4.grid(column=0, row=4, pady=(11,15), padx=(10,0))
+label_5 = ttk.Label(main_frame, text="Output folder", width=12)
+label_5.grid(column=0, row=4, pady=(11,15), padx=(10,0))
 
 
 # Variable para almacenar el texto actualizado
@@ -273,13 +275,20 @@ def change_folder():
         with open(curr_dir + '/' + 'settings.json', 'w') as writefile:
             json.dump(settings_file, writefile, indent=4)
 
+def folder_name():
+    global folder_path
+    return folder_path
+
 
 # Crear un Button para seleccionar una carpeta
 browse_folder = ttk.Button(main_frame, text="Browse", command=change_folder)
 browse_folder.grid(column=1, row=4, pady=(11,15), sticky="w")
 
-label_4 = ttk.Label(main_frame, textvariable=folder_output, width=12)
-label_4.grid(column=2, row=4, pady=(11,15), padx=(0,0), sticky="w")
+label_6 = ttk.Label(main_frame, textvariable=folder_output, width=12)
+label_6.grid(column=2, row=4, pady=(11,15), padx=(0,0), sticky="w")
+label_6_tip = ToolTip(label_6, msg=folder_name, follow=True, delay=0.5)
+
+# label_6_tip = Hovertip(label_6,str(folder_path),500)
 
 
 separator = ttk.Separator(main_frame, orient="horizontal")

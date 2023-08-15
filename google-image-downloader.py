@@ -182,11 +182,12 @@ def image_scraping(input_search, count, is_transp, is_hq, folder):
             while True:
 
                 try:
-                    # png, jpg
-                    imageElement = WebDriverWait(driver, 3).until(lambda x: x.find_element(By.XPATH, """//*[@id="Sva75c"]/div[2]/div/div[2]/div[2]/div[2]/c-wiz/div/div/div/div[3]/div[1]/a/img[1]"""))
+                    # png, jpg //*[@id="Sva75c"]/div[2]/div[2]/div[2]/div[2]/c-wiz/div/div/div/div[3]/div[1]/a/img[1]
+                    #          //*[@id="Sva75c"]/div[2]/div[2]/div[2]/div[2]/c-wiz/div/div/div/div[2]/div/a/img[1]
+                    imageElement = WebDriverWait(driver, 3).until(lambda x: x.find_element(By.XPATH, """//*[@id="Sva75c"]/div[2]/div[2]/div[2]/div[2]/c-wiz/div/div/div/div[3]/div[1]/a/img[1]"""))
                 except:
                     # GIF 
-                    imageElement = WebDriverWait(driver, 3).until(lambda x: x.find_element(By.XPATH, """//*[@id="Sva75c"]/div[2]/div/div[2]/div[2]/div[2]/c-wiz/div/div/div/div[2]/div/a/img[1]"""))
+                    imageElement = WebDriverWait(driver, 3).until(lambda x: x.find_element(By.XPATH, """//*[@id="Sva75c"]/div[2]/div[2]/div[2]/div[2]/c-wiz/div/div/div/div[2]/div/a/img[1]"""))
                     
                 imageURL= imageElement.get_attribute('src')
 
